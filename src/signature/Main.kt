@@ -5,105 +5,121 @@ fun main() {
 }
 
 class Main {
-    private val sbTop = StringBuilder()
-    private val sbMid = StringBuilder()
-    private val sbBtm = StringBuilder()
-
     fun run() {
-        print("Enter name and surname: ")
-        val input = readLine()!!.trim()
-        print("Enter person's status: ")
-        val status = readLine()!!.trim()
+        val input = input()
+        val signature = createSignature(input[0], input[1])
+        output(signature)
+    }
 
-        for (value in input) {
+    private fun createSignature(name: String, status: String): Array<String> {
+        val data = Array(3) { StringBuilder() }
+
+        for (value in name) {
             if (value.isLetter()) {
-                appendLetter(value.toLowerCase())
-                appendChar(' ', 1)
+                appendLetter(value.toLowerCase(), data)
+                addEnd(" ", 1, data)
             } else if (value == ' ') {
-                appendChar(' ', 5)
+                addEnd(" ", 5, data)
             } else {
-                appendChar(' ', 1)
+                addEnd(" ", 1, data)
             }
         }
-        appendChar(' ', 1)
-        sbTop.insert(0, "  ")
-        sbMid.insert(0, "  ")
-        sbBtm.insert(0, "  ")
+        addEnd(" ", 1, data)
+        addBgn(" ", 2, data)
 
         var statusLine: String
 
-        if (status.length <= sbTop.length - 2) {
-            val sbLength = sbTop.length
-
+        if (status.length <= data[0].length - 2) {
+            val sbLength = data[0].length
             val pos = calculatePositions(sbLength, status.length)
+
             statusLine = " ".repeat(sbLength)
                 .replaceRange(pos[0], pos[1], status)
         } else {
             statusLine = "  $status  "
 
-            val offset = statusLine.length - sbTop.length
+            val offset = statusLine.length - data[0].length
             val leftHalf = offset / 2
-
             val rightHalf = if (offset % 2 == 0) offset / 2 else offset / 2 + 1
 
-            appendChar(' ', rightHalf)
-            sbTop.insert(0, " ".repeat(leftHalf))
-            sbMid.insert(0, " ".repeat(leftHalf))
-            sbBtm.insert(0, " ".repeat(leftHalf))
+            addBgn(" ", leftHalf, data)
+            addEnd(" ", rightHalf, data)
 
-            if (statusLine.length != sbTop.length) {
+            if (statusLine.length != data[0].length) {
                 statusLine = "$statusLine "
             }
         }
-        val sp = if (statusLine[1] != ' ') "  " else if (statusLine[0] != ' ') " " else ""
-        val verticalLine = createVerticalLine(sbTop.length + sp.length * 2 + 2, "*")
+        val spaces = if (statusLine[1] != ' ') 2 else if (statusLine[0] != ' ') 1 else 0
+        val verticalLine = createVerticalLine(data[0].length + spaces * 2 + 2, "*")
 
-        println(verticalLine)
-        println("*$sp$sbTop$sp*")
-        println("*$sp$sbMid*$sp")
-        println("$sp*$sbBtm*$sp")
-        println("*$sp$statusLine*$sp")
-        println(verticalLine)
+        addBgn(" ", spaces, data)
+        addEnd(" ", spaces, data)
+        addBgn("*", 1, data)
+        addEnd("*", 1, data)
+
+        val output = Array(data.size + 3) { "" }
+        output[0] = verticalLine
+        for (i in data.indices) output[i + 1] = data[i].toString()
+        val sp = " ".repeat(spaces)
+        output[output.lastIndex - 1] = "*$sp$statusLine*$sp"
+        output[output.lastIndex] = verticalLine
+
+        return output
     }
 
-    private fun appendLetter(letter: Char) {
+    private fun input(): Array<String> {
+        print("Enter name and surname: ")
+        val input = readLine()!!.trim()
+        print("Enter person's status: ")
+        val status = readLine()!!.trim()
+        return arrayOf(input, status)
+    }
+
+    private fun <T> output(data: Array<T>) {
+        for (line in data) {
+            println(line)
+        }
+    }
+
+    private fun appendLetter(letter: Char, data: Array<StringBuilder>) {
         for ((index, c) in ('a'..'z').withIndex()) {
             if (c == letter) {
-                sbTop.append(arrayTop[index])
-                sbMid.append(arrayMid[index])
-                sbBtm.append(arrayBtm[index])
+                data[0].append(arrayTop[index])
+                data[1].append(arrayMid[index])
+                data[2].append(arrayBtm[index])
                 return
             }
         }
     }
+}
 
-    private fun appendChar(char: Char, times: Int) {
-        repeat(times) {
-            sbTop.append(char)
-            sbMid.append(char)
-            sbBtm.append(char)
-        }
+private fun addBgn(str: String, times: Int, data: Array<StringBuilder>): Array<StringBuilder> {
+    val s = str.repeat(times)
+    for (sb in data) {
+        sb.insert(0, s)
     }
+    return data
+}
+
+private fun addEnd(str: String, times: Int, data: Array<StringBuilder>): Array<StringBuilder> {
+    val s = str.repeat(times)
+    for (sb in data) {
+        sb.append(s)
+    }
+    return data
 }
 
 private fun calculatePositions(sbLength: Int, statusLength: Int): List<Int> {
-    val startPos: Int
-    val endPos: Int
-
-    if (sbLength % 2 == 0 && statusLength % 2 == 1) {
-        startPos = sbLength / 2 - statusLength / 2 - 1
+    val startPos = if (sbLength % 2 == 0 && statusLength % 2 == 1) {
+        sbLength / 2 - statusLength / 2 - 1
     } else {
-        startPos = sbLength / 2 - statusLength / 2
+        sbLength / 2 - statusLength / 2
     }
-    endPos = startPos + statusLength
+    val endPos = startPos + statusLength
 
     return listOf(startPos, endPos)
 }
 
 private fun createVerticalLine(length: Int, element: String): String {
-    val line = StringBuilder()
-    repeat(length) {
-        line.append(element)
-    }
-    return line.toString()
+    return element.repeat(length)
 }
