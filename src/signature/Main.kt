@@ -12,20 +12,9 @@ class Main {
     }
 
     private fun createSignature(name: String, status: String): Array<String> {
-        val data = Array(3) { StringBuilder() }
+        val data = Array(10) { StringBuilder() }
 
-        for (value in name) {
-            if (value.isLetter()) {
-                appendBuiltinLetter(value.toLowerCase(), data)
-                addEnd(" ", 1, data)
-            } else if (value == ' ') {
-                addEnd(" ", 5, data)
-            } else {
-                addEnd(" ", 1, data)
-            }
-        }
-        addEnd(" ", 1, data)
-        addBgn(" ", 2, data)
+        convertString(name, "src/signature/fonts/roman.txt", data)
 
         var statusLine: String
 
@@ -65,6 +54,18 @@ class Main {
         output[output.lastIndex] = verticalLine
 
         return output
+    }
+
+    private fun convertString(str: String, fontPath: String, data: Array<StringBuilder>) {
+        for (char in str) {
+            if (char.isLetter()) {
+                appendCharFromFile(fontPath, char, data)
+            } else if (char == ' ') {
+                addEnd(" ", 5, data)
+            }
+        }
+        addEnd(" ", 1, data)
+        addBgn(" ", 2, data)
     }
 
     private fun input(): Array<String> {
