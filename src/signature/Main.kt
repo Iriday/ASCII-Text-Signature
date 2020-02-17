@@ -16,7 +16,7 @@ class Main {
 
         for (value in name) {
             if (value.isLetter()) {
-                appendLetter(value.toLowerCase(), data)
+                appendBuiltinLetter(value.toLowerCase(), data)
                 addEnd(" ", 1, data)
             } else if (value == ' ') {
                 addEnd(" ", 5, data)
@@ -78,17 +78,6 @@ class Main {
     private fun <T> output(data: Array<T>) {
         for (line in data) {
             println(line)
-        }
-    }
-
-    private fun appendLetter(letter: Char, data: Array<StringBuilder>) {
-        for ((index, c) in ('a'..'z').withIndex()) {
-            if (c == letter) {
-                data[0].append(arrayTop[index])
-                data[1].append(arrayMid[index])
-                data[2].append(arrayBtm[index])
-                return
-            }
         }
     }
 }
