@@ -15,17 +15,10 @@ class Main {
         val nm = Array(10) { StringBuilder() } // name
         val st = Array(3) { StringBuilder() } // status
 
-        convertString(name, "src/signature/fonts/roman.txt", nm)
+        convertString(name, "src/signature/fonts/roman.txt", 10, nm)
         removeFirstLastDigit(2, nm) // remove spaces to ease positioning
-        for (char in status) {
-            if (char.isLetter()) {
-                appendBuiltinLetter(char.toLowerCase(), st)
-                addEnd(" ", 1, st)
-            } else if (char == ' ') {
-                addEnd(" ", 5, st)
-            }
-        }
-        for (sb in st) sb.deleteCharAt(sb.lastIndex)
+        convertString(status, "src/signature/fonts/medium.txt", 5, st)
+        removeFirstLastDigit(2, st)
 
         if (nm[0].length > st[0].length) {
             adjustLength(nm, st)
@@ -37,12 +30,12 @@ class Main {
         return createOutput(nm, st, "*")
     }
 
-    private fun convertString(str: String, fontPath: String, data: Array<StringBuilder>) {
+    private fun convertString(str: String, fontPath: String, lenBetweenWords: Int, data: Array<StringBuilder>) {
         for (char in str) {
             if (char.isLetter()) {
                 appendCharFromFile(fontPath, char, data)
             } else if (char == ' ') {
-                addEnd(" ", 10, data)
+                addEnd(" ", lenBetweenWords, data)
             }
         }
         addEnd(" ", 1, data)
