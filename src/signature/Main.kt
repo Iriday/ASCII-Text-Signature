@@ -13,44 +13,31 @@ class Main {
 
     private fun createSignature(name: String, status: String): Array<String> {
         val data = Array(10) { StringBuilder() }
+        var status = status
 
         convertString(name, "src/signature/fonts/roman.txt", data)
+        removeFirstLastDigit(2, data) // remove spaces to ease positioning
 
-        var statusLine: String
-
-        if (status.length <= data[0].length - 2) {
-            val sbLength = data[0].length
-            val pos = calculatePositions(sbLength, status.length)
-
-            statusLine = " ".repeat(sbLength)
-                .replaceRange(pos[0], pos[1], status)
-        } else {
-            statusLine = "  $status  "
-
-            val offset = statusLine.length - data[0].length
-            val leftHalf = offset / 2
-            val rightHalf = if (offset % 2 == 0) offset / 2 else offset / 2 + 1
-
-            addBgn(" ", leftHalf, data)
-            addEnd(" ", rightHalf, data)
-
-            if (statusLine.length != data[0].length) {
-                statusLine = "$statusLine "
+        if (data[0].length > status.length) {
+            val pos = calculatePositions(data[0].length, status.length)
+            status = " ".repeat(data[0].length).replaceRange(pos[0], pos[1], status)
+        } else if (data[0].length < status.length) {
+            val pos = calculatePositions(status.length, data[0].length)
+            val line = " ".repeat(status.length)
+            for (i in data.indices) {
+                data[i] = StringBuilder(line.replaceRange(pos[0], pos[1], data[i]))
             }
-        }
-        val spaces = if (statusLine[1] != ' ') 2 else if (statusLine[0] != ' ') 1 else 0
-        val verticalLine = createVerticalLine(data[0].length + spaces * 2 + 2, "*")
+        } // else if data[0].length == status.length  ignore, just add spaces/border
+        status = "*  $status  *"
+        addBgn("*  ", 1, data)
+        addEnd("  *", 1, data)
 
-        addBgn(" ", spaces, data)
-        addEnd(" ", spaces, data)
-        addBgn("*", 1, data)
-        addEnd("*", 1, data)
+        val verticalLine = createVerticalLine(status.length, "*")
 
         val output = Array(data.size + 3) { "" }
         output[0] = verticalLine
         for (i in data.indices) output[i + 1] = data[i].toString()
-        val sp = " ".repeat(spaces)
-        output[output.lastIndex - 1] = "*$sp$statusLine*$sp"
+        output[output.lastIndex - 1] = status
         output[output.lastIndex] = verticalLine
 
         return output
@@ -97,6 +84,13 @@ private fun addEnd(str: String, times: Int, data: Array<StringBuilder>): Array<S
         sb.append(s)
     }
     return data
+}
+
+private fun removeFirstLastDigit(howMany: Int, data: Array<StringBuilder>) {
+    for (sb in data) {
+        sb.delete(sb.length - howMany, sb.length)
+        sb.delete(0, howMany)
+    }
 }
 
 private fun calculatePositions(sbLength: Int, statusLength: Int): List<Int> {
