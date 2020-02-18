@@ -7,11 +7,11 @@ fun main() {
 class Main {
     fun run() {
         val input = input()
-        val signature = createSignature(input[0], input[1])
+        val signature = createSignature(input[0], input[1], input[2])
         output(signature)
     }
 
-    private fun createSignature(name: String, status: String): Array<String> {
+    private fun createSignature(name: String, status: String, border: String): Array<String> {
         val nm = Array(10) { StringBuilder() } // name
         val st = Array(3) { StringBuilder() } // status
 
@@ -27,7 +27,7 @@ class Main {
             adjustLength(st, nm)
         } // else if nm[0].length == st[0].length  ignore, just add spaces/border
 
-        return createOutput(nm, st, "*")
+        return createOutput(nm, st, border)
     }
 
     private fun convertString(str: String, fontPath: String, lenBetweenWords: Int, data: Array<StringBuilder>) {
@@ -51,11 +51,12 @@ class Main {
     }
 
     private fun createOutput(nm: Array<StringBuilder>, st: Array<StringBuilder>, borderElem: String): Array<String> {
-        addBgn("$borderElem  ", 1, st)
-        addEnd("  $borderElem", 1, st)
-        addBgn("$borderElem  ", 1, nm)
-        addEnd("  $borderElem", 1, nm)
-        val verticalLine = borderElem.repeat(nm[0].length).substring(0..nm[0].lastIndex)
+        val border = if (borderElem.isEmpty()) " " else borderElem
+        addBgn("$border  ", 1, st)
+        addEnd("  $border", 1, st)
+        addBgn("$border  ", 1, nm)
+        addEnd("  $border", 1, nm)
+        val verticalLine = border.repeat(nm[0].length).substring(0..nm[0].lastIndex)
 
         val output = Array(nm.size + st.size + 2) { "" }
         output[0] = verticalLine
@@ -67,11 +68,13 @@ class Main {
     }
 
     private fun input(): Array<String> {
-        print("Enter name and surname: ")
+        print("Enter name and surname (or something else): ")
         val input = readLine()!!.trim()
-        print("Enter person's status: ")
+        print("Enter person's status (or something else): ")
         val status = readLine()!!.trim()
-        return arrayOf(input, status)
+        print("Enter border element (example: *,88,#, ,<>,<->,etc): ")
+        val border = readLine()!!
+        return arrayOf(input, status, border)
     }
 
     private fun <T> output(data: Array<T>) {
