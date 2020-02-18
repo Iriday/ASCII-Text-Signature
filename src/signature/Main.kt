@@ -12,35 +12,29 @@ class Main {
     }
 
     private fun createSignature(name: String, status: String): Array<String> {
-        val data = Array(10) { StringBuilder() }
-        var status = status
+        val nm = Array(10) { StringBuilder() } // name
+        val st = Array(3) { StringBuilder() } // status
 
-        convertString(name, "src/signature/fonts/roman.txt", data)
-        removeFirstLastDigit(2, data) // remove spaces to ease positioning
-
-        if (data[0].length > status.length) {
-            val pos = calculatePositions(data[0].length, status.length)
-            status = " ".repeat(data[0].length).replaceRange(pos[0], pos[1], status)
-        } else if (data[0].length < status.length) {
-            val pos = calculatePositions(status.length, data[0].length)
-            val line = " ".repeat(status.length)
-            for (i in data.indices) {
-                data[i] = StringBuilder(line.replaceRange(pos[0], pos[1], data[i]))
+        convertString(name, "src/signature/fonts/roman.txt", nm)
+        removeFirstLastDigit(2, nm) // remove spaces to ease positioning
+        for (char in status) {
+            if (char.isLetter()) {
+                appendBuiltinLetter(char.toLowerCase(), st)
+                addEnd(" ", 1, st)
+            } else if (char == ' ') {
+                addEnd(" ", 5, st)
             }
-        } // else if data[0].length == status.length  ignore, just add spaces/border
-        status = "*  $status  *"
-        addBgn("*  ", 1, data)
-        addEnd("  *", 1, data)
+        }
+        for (sb in st) sb.deleteCharAt(sb.lastIndex)
 
-        val verticalLine = createVerticalLine(status.length, "*")
+        if (nm[0].length > st[0].length) {
+            adjustLength(nm, st)
 
-        val output = Array(data.size + 3) { "" }
-        output[0] = verticalLine
-        for (i in data.indices) output[i + 1] = data[i].toString()
-        output[output.lastIndex - 1] = status
-        output[output.lastIndex] = verticalLine
+        } else if (nm[0].length < st[0].length) {
+            adjustLength(st, nm)
+        } // else if nm[0].length == st[0].length  ignore, just add spaces/border
 
-        return output
+        return createOutput(nm, st, "*")
     }
 
     private fun convertString(str: String, fontPath: String, data: Array<StringBuilder>) {
@@ -48,11 +42,35 @@ class Main {
             if (char.isLetter()) {
                 appendCharFromFile(fontPath, char, data)
             } else if (char == ' ') {
-                addEnd(" ", 5, data)
+                addEnd(" ", 10, data)
             }
         }
         addEnd(" ", 1, data)
         addBgn(" ", 2, data)
+    }
+
+    private fun adjustLength(one: Array<StringBuilder>, two: Array<StringBuilder>) {
+        val pos = calculatePositions(one[0].length, two[0].length)
+        val line = " ".repeat(one[0].length)
+        for (i in two.indices) {
+            two[i] = StringBuilder(line.replaceRange(pos[0], pos[1], two[i]))
+        }
+    }
+
+    private fun createOutput(nm: Array<StringBuilder>, st: Array<StringBuilder>, borderElem: String): Array<String> {
+        addBgn("$borderElem  ", 1, st)
+        addEnd("  $borderElem", 1, st)
+        addBgn("$borderElem  ", 1, nm)
+        addEnd("  $borderElem", 1, nm)
+        val verticalLine = borderElem.repeat(nm[0].length).substring(0..nm[0].lastIndex)
+
+        val output = Array(nm.size + st.size + 2) { "" }
+        output[0] = verticalLine
+        for (row in nm.indices) output[row + 1] = nm[row].toString()
+        for (row in st.indices) output[row + 1 + nm.size] = st[row].toString()
+        output[output.lastIndex] = verticalLine
+
+        return output
     }
 
     private fun input(): Array<String> {
@@ -102,8 +120,4 @@ private fun calculatePositions(sbLength: Int, statusLength: Int): List<Int> {
     val endPos = startPos + statusLength
 
     return listOf(startPos, endPos)
-}
-
-private fun createVerticalLine(length: Int, element: String): String {
-    return element.repeat(length)
 }
