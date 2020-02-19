@@ -6,9 +6,13 @@ fun main() {
 
 class Main {
     fun run() {
-        val input = input()
-        val signature = createSignature(input[0], input[1], input[2])
-        output(signature)
+        do {
+            val input = input()
+            println()
+            val signature = createSignature(input[0], input[1], input[2])
+            output(signature)
+            println("\n1. start again\n2. exit")
+        } while (readLine()!! != "2")
     }
 
     private fun createSignature(name: String, status: String, border: String): Array<String> {
